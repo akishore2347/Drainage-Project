@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}About – DrainSight AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Page Header -->
+  <div class="text-center mb-5">
+    <div class="d-inline-flex align-items-center bg-info bg-opacity-25 text-info px-3 py-1 rounded-pill small fw-semibold mb-2">
+      <i class="bi bi-mortarboard me-2"></i> Engineering Project Documentation
+    </div>
+    <h2 class="fw-bold">About DrainSight AI</h2>
+    <p class="text-muted max-w-700 mx-auto">
+      Intelligent Drainage Monitoring and Early Flood Prevention System developed as a computer vision 
+      final-year engineering initiative.
+    </p>
+  </div>
+
+  <!-- Project Objective & Problem Statement -->
+  <div class="row g-4 mb-5">
+    <div class="col-lg-6">
+      <div class="card-custom h-100 p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-bullseye me-2 text-primary"></i> Project Objective</h5>
+        <p class="text-muted small">
+          DrainSight AI addresses urban water stagnation and flash flooding by automating the visual inspection 
+          of storm drains, culverts, and roadside gutters.
+        </p>
+        <p class="text-muted small">
+          By combining OpenCV computer vision preprocessing with Ultralytics YOLOv8 deep learning, the system 
+          identifies surface waste (plastic bottles, wrappers, fallen leaves, paper waste, and mud accumulation) 
+          and estimates the percentage blockage without requiring physical sensor hardware.
+        </p>
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          <span class="badge bg-light text-primary border">Automated Inspection</span>
+          <span class="badge bg-light text-success border">Flood Mitigation</span>
+          <span class="badge bg-light text-dark border">Zero Physical Sensors</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card-custom h-100 p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-exclamation-triangle me-2 text-danger"></i> Problem Statement</h5>
+        <p class="text-muted small">
+          Urban stormwater drainage networks routinely get choked by solid waste, leading to localized inundation, 
+          road damage, mosquito breeding, and severe property destruction during monsoon rains.
+        </p>
+        <p class="text-muted small">
+          Traditional municipal drainage monitoring relies on hazardous, labor-intensive manual inspections or 
+          fragile submerged ultrasonic sensors that foul within weeks. DrainSight AI introduces an accessible, 
+          non-contact, computer-vision alternative deployable on laptops, mobile phones, or patrol vehicles.
+        </p>
+        <div class="p-3 bg-light rounded small border">
+          <strong>Key Benefit:</strong> Provides municipal authorities with rapid, quantitative evidence to dispatch 
+          cleaning crews before minor blockages escalate into catastrophic road flooding.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Literature Survey Table -->
+  <div class="card-custom p-4 mb-5">
+    <h5 class="fw-bold mb-3"><i class="bi bi-journal-text me-2 text-primary"></i> Literature Survey &amp; Academic References</h5>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle small mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>S.No.</th>
+            <th>Author / Year</th>
+            <th>Methodology / Description</th>
+            <th>Identified Limitation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td><strong>Bradski (2000)</strong></td>
+            <td>OpenCV library for real-time computer vision, color space transforms, and spatial filtering.</td>
+            <td>Classical filters cannot classify semantic debris categories without trained deep nets.</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><strong>Redmon et al. (2016)</strong></td>
+            <td>You Only Look Once (YOLO): Unified, real-time convolutional object detection.</td>
+            <td>Early models struggled with small clustered objects and varied outdoor lighting.</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td><strong>Redmon &amp; Farhadi (2018)</strong></td>
+            <td>YOLOv3: Feature pyramid networks and multi-scale bounding box predictions.</td>
+            <td>Requires domain-specific dataset annotations for municipal urban drainage.</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td><strong>Szeliski (2022)</strong></td>
+            <td>Computer Vision: Algorithms and Applications (geometric transforms, edge detection).</td>
+            <td>Heuristics must be tuned for outdoor muddy water conditions.</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td><strong>Ultralytics (2023–2026)</strong></td>
+            <td>YOLOv8 anchor-free architecture for real-time edge object detection and segmentation.</td>
+            <td>Requires balanced training annotations across multiple environmental weather splits.</td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td><strong>World Bank (2012)</strong></td>
+            <td>Urban Flood Risk Management: Guide to Good Practice for stormwater drainage maintenance.</td>
+            <td>Highlights high recurring operational cost of sensor-based telemetry.</td>
+          </tr>
+          <tr>
+            <td>7</td>
+            <td><strong>U.S. EPA (SWMM)</strong></td>
+            <td>Storm Water Management Model: Establishes hydraulic orifice blockage thresholds.</td>
+            <td>Lacks vision-based automated intake inspection hooks.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- System Modules Breakdown -->
+  <div class="card-custom p-4 mb-5">
+    <h5 class="fw-bold mb-4"><i class="bi bi-layers me-2 text-primary"></i> Four Functional System Modules</h5>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-3">
+        <div class="p-3 bg-light rounded h-100 border">
+          <h6 class="fw-bold text-primary">Module 1: Preprocessing</h6>
+          <p class="small text-muted mb-0">
+            Validates image/video formats, extracts frames, performs Bilateral noise reduction, and applies CLAHE 
+            adaptive histogram enhancement for low-light images.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="p-3 bg-light rounded h-100 border">
+          <h6 class="fw-bold text-purple" style="color: #6d28d9;">Module 2: AI Detection</h6>
+          <p class="small text-muted mb-0">
+            Executes YOLOv8 to locate drain aperture coordinates and detect visible debris (plastic, leaves, paper, 
+            mud) with confidence metrics.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="p-3 bg-light rounded h-100 border">
+          <h6 class="fw-bold text-warning">Module 3: Assessment</h6>
+          <p class="small text-muted mb-0">
+            Calculates geometric IoU overlap between waste masks and drain opening. Classifies into Clear (0-20%), 
+            Partial (21-60%), and Heavy (&gt;60%).
+          </p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="p-3 bg-light rounded h-100 border">
+          <h6 class="fw-bold text-success">Module 4: Telemetry</h6>
+          <p class="small text-muted mb-0">
+            Renders annotated output media with HUD banners, logs SQLite records, powers interactive Chart.js charts, 
+            and exports CSV reports.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Project Limitations & Future Scope -->
+  <div class="row g-4">
+    <div class="col-lg-6">
+      <div class="card-custom h-100 p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-slash-circle me-2 text-warning"></i> Current System Limitations</h5>
+        <ul class="small text-muted ps-3 mb-0">
+          <li class="mb-2"><strong>Visual-Only 2D Surface Detection:</strong> Detects surface blockages at the drain grate; cannot see deep subterranean pipe collapses.</li>
+          <li class="mb-2"><strong>Extreme Turbidity:</strong> Heavily murky floodwater may obscure submerged trash under the surface.</li>
+          <li class="mb-2"><strong>Severe Weather Occlusion:</strong> Heavy torrential rain splashing directly onto camera lenses can cause optical distortion.</li>
+          <li><strong>Free Hosting Memory Constraints:</strong> Video uploads on free cloud tiers (Render) are limited to short clips to avoid out-of-memory errors.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card-custom h-100 p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-rocket-takeoff me-2 text-info"></i> Future Roadmap &amp; Extensions</h5>
+        <ul class="small text-muted ps-3 mb-0">
+          <li class="mb-2"><strong>Native Android Application:</strong> Offline on-device YOLOv8-TFLite inspection app for field municipal sanitation workers.</li>
+          <li class="mb-2"><strong>Autonomous Drone Patrols:</strong> Low-altitude aerial inspection of municipal canal banks and storm drains.</li>
+          <li class="mb-2"><strong>Municipal GIS &amp; SMS Dispatch:</strong> Integration with Google Maps API and SMS alert gateways to automatically notify district engineers.</li>
+          <li><strong>Edge CCTV Cameras:</strong> Real-time 24/7 RTSP video stream analysis installed directly over high-risk urban drainage culverts.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+# DrainSight AI - YOLOv8 Dataset Configuration
+path: ./dataset
+train: images/train
+val: images/val
+test: images/test
+
+names:
+  0: drain_opening
+  1: plastic_waste
+  2: leaves
+  3: paper_waste
+  4: mud_sediment
+
+nc: 5

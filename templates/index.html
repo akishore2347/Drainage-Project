@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}DrainSight AI – Intelligent Drainage Monitoring System{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="container position-relative">
+    <div class="row align-items-center gy-4">
+      <div class="col-lg-7">
+        <div class="d-inline-flex align-items-center bg-info bg-opacity-25 text-info px-3 py-1 rounded-pill small fw-semibold mb-3">
+          <i class="bi bi-shield-check me-2"></i> Computer Vision for Urban Water Safety
+        </div>
+        <h1 class="hero-title">
+          DrainSight <span class="text-info">AI</span>
+          <br><span class="fs-3 fw-normal text-light">Intelligent Drainage Monitoring System</span>
+        </h1>
+        <p class="hero-subtitle mb-4">
+          Detect and quantify drainage obstructions from images or videos without physical sensors. 
+          Powered by YOLOv8 deep learning and OpenCV to locate plastic bottles, bags, leaves, paper, 
+          and silt accumulation for immediate flood mitigation.
+        </p>
+
+        <div class="d-flex flex-wrap gap-3">
+          <a href="{{ url_for('upload_image') }}" class="btn btn-primary-custom btn-lg">
+            <i class="bi bi-upload me-2"></i> Upload Image
+          </a>
+          <a href="{{ url_for('upload_video') }}" class="btn btn-secondary-custom btn-lg">
+            <i class="bi bi-camera-video me-2"></i> Upload Video
+          </a>
+          <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light btn-lg">
+            <i class="bi bi-speedometer2 me-2"></i> View Dashboard
+          </a>
+          <a href="{{ url_for('how_it_works') }}" class="btn btn-link text-info text-decoration-none d-flex align-items-center">
+            Learn How It Works <i class="bi bi-arrow-right ms-2"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-5 text-center">
+        <div class="card-custom bg-transparent border-0 p-2">
+          <img src="{{ url_for('static', filename='images/drain_hero.svg') }}" 
+               alt="DrainSight AI Monitoring" class="img-fluid rounded-4 shadow-lg">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Quick Demo Tester (No Upload Needed) -->
+<section class="container mt-n4 position-relative" style="margin-top: -2.5rem; z-index: 10;">
+  <div class="card-custom p-4 bg-white shadow">
+    <div class="row align-items-center gy-3">
+      <div class="col-lg-4">
+        <div class="d-flex align-items-center">
+          <div class="stat-icon stat-icon-blue me-3">
+            <i class="bi bi-play-circle-fill"></i>
+          </div>
+          <div>
+            <h5 class="mb-0 fw-bold">Instant Demo Inspection</h5>
+            <small class="text-muted">Test with pre-bundled drainage images</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-8">
+        <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
+          <form action="{{ url_for('analyze_sample', sample_name='clear') }}" method="POST" class="d-inline">
+            <button type="submit" class="btn btn-outline-success">
+              <i class="bi bi-check2-circle me-1"></i> Clear Drain (0-20%)
+            </button>
+          </form>
+          <form action="{{ url_for('analyze_sample', sample_name='partial') }}" method="POST" class="d-inline">
+            <button type="submit" class="btn btn-outline-warning text-dark">
+              <i class="bi bi-exclamation-circle me-1"></i> Partial Blockage (21-60%)
+            </button>
+          </form>
+          <form action="{{ url_for('analyze_sample', sample_name='heavy') }}" method="POST" class="d-inline">
+            <button type="submit" class="btn btn-outline-danger">
+              <i class="bi bi-exclamation-octagon me-1"></i> Heavy Blockage (&gt;60%)
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Real-time Summary KPI Cards -->
+<section class="container my-5">
+  <div class="row gy-3">
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-blue">
+          <i class="bi bi-folder-check"></i>
+        </div>
+        <div>
+          <div class="stat-value">{{ stats.total_inspections }}</div>
+          <div class="stat-label">Total Inspected</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-green">
+          <i class="bi bi-shield-check"></i>
+        </div>
+        <div>
+          <div class="stat-value">{{ stats.clear_count }}</div>
+          <div class="stat-label">Clear Drains</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-amber">
+          <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <div>
+          <div class="stat-value">{{ stats.partial_count }}</div>
+          <div class="stat-label">Partial Block</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-red">
+          <i class="bi bi-shield-slash"></i>
+        </div>
+        <div>
+          <div class="stat-value">{{ stats.heavy_count }}</div>
+          <div class="stat-label">Heavy Block</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Core Modules Overview -->
+<section class="container my-5">
+  <div class="text-center mb-5">
+    <h2 class="fw-bold">How DrainSight AI Operates</h2>
+    <p class="text-muted">A modular computer-vision pipeline built to work without physical sensor hardware.</p>
+  </div>
+
+  <div class="row g-4">
+    <!-- Module 1 -->
+    <div class="col-md-6 col-lg-3">
+      <div class="card-custom h-100 p-4">
+        <div class="step-number">1</div>
+        <h5 class="fw-bold">Input &amp; Preprocessing</h5>
+        <p class="text-muted small">
+          Accepts high-resolution images and videos. Applies bilateral denoising, CLAHE lighting enhancement, 
+          and 640x640 normalization.
+        </p>
+        <span class="badge bg-light text-primary border">OpenCV 4.8</span>
+      </div>
+    </div>
+
+    <!-- Module 2 -->
+    <div class="col-md-6 col-lg-3">
+      <div class="card-custom h-100 p-4">
+        <div class="step-number">2</div>
+        <h5 class="fw-bold">YOLOv8 Detection</h5>
+        <p class="text-muted small">
+          Identifies drain apertures alongside 4 critical waste classes: plastic bags, leaves, paper debris, 
+          and mud sediment.
+        </p>
+        <span class="badge bg-light text-primary border">Ultralytics YOLOv8</span>
+      </div>
+    </div>
+
+    <!-- Module 3 -->
+    <div class="col-md-6 col-lg-3">
+      <div class="card-custom h-100 p-4">
+        <div class="step-number">3</div>
+        <h5 class="fw-bold">IoU Overlap Logic</h5>
+        <p class="text-muted small">
+          Calculates geometric intersection between waste masks and the drain rim to output an exact percentage 
+          blockage metric.
+        </p>
+        <span class="badge bg-light text-primary border">Mathematical Vision</span>
+      </div>
+    </div>
+
+    <!-- Module 4 -->
+    <div class="col-md-6 col-lg-3">
+      <div class="card-custom h-100 p-4">
+        <div class="step-number">4</div>
+        <h5 class="fw-bold">Alerting &amp; Reports</h5>
+        <p class="text-muted small">
+          Categorizes risk (Clear, Partial, Heavy), issues urgent municipal warning alerts, logs SQLite records, 
+          and exports CSV reports.
+        </p>
+        <span class="badge bg-light text-primary border">Dashboard &amp; Telemetry</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action Banner -->
+<section class="container my-5">
+  <div class="card-custom p-5 bg-dark text-white text-center position-relative overflow-hidden" 
+       style="background: linear-gradient(135deg, #0f172a 0%, #0369a1 100%) !important;">
+    <h3 class="fw-bold mb-3">Ready to Inspect a Drainage System?</h3>
+    <p class="text-light opacity-75 max-w-600 mx-auto mb-4">
+      Upload roadside gutter photos, culvert pipe outlets, or manhole grating videos to receive an instant blockage diagnosis.
+    </p>
+    <div class="d-flex justify-content-center gap-3">
+      <a href="{{ url_for('upload_image') }}" class="btn btn-primary-custom btn-lg">
+        <i class="bi bi-image me-1"></i> Inspect Image
+      </a>
+      <a href="{{ url_for('upload_video') }}" class="btn btn-outline-light btn-lg">
+        <i class="bi bi-camera-video me-1"></i> Inspect Video
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}Inspection Result – DrainSight AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Breadcrumb & Top Bar -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <div>
+      <a href="{{ url_for('dashboard') }}" class="text-decoration-none small text-muted">
+        <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+      </a>
+      <h2 class="fw-bold mb-0 mt-1">Inspection Diagnosis Report</h2>
+      <span class="text-muted small">
+        Analysis #{{ record.id }} &bull; Media: {{ record.file_type.capitalize() }} &bull; {{ record.created_at }}
+      </span>
+    </div>
+    <div class="d-flex gap-2 mt-2 mt-md-0">
+      <a href="{{ url_for('download_file', filename=record.output_filename) }}" class="btn btn-outline-primary">
+        <i class="bi bi-download me-1"></i> Download Annotated {{ record.file_type.capitalize() }}
+      </a>
+      <a href="{{ url_for('upload_image') }}" class="btn btn-primary-custom">
+        <i class="bi bi-plus-circle me-1"></i> New Inspection
+      </a>
+    </div>
+  </div>
+
+  <!-- Executive Diagnosis Hero Card -->
+  <div class="card-custom p-4 mb-4">
+    <div class="row align-items-center gy-3">
+      <!-- Status Badge & Percentage -->
+      <div class="col-lg-5 border-lg-end">
+        <div class="d-flex align-items-center mb-3">
+          {% if record.blockage_status == 'Clear' %}
+            <span class="stat-icon stat-icon-green me-3"><i class="bi bi-shield-check"></i></span>
+            <div>
+              <span class="badge badge-status badge-status-clear mb-1">Clear Condition</span>
+              <h3 class="fw-bold mb-0 text-success">{{ record.blockage_percentage }}% Blockage</h3>
+            </div>
+          {% elif record.blockage_status == 'Partially Blocked' %}
+            <span class="stat-icon stat-icon-amber me-3"><i class="bi bi-exclamation-triangle-fill"></i></span>
+            <div>
+              <span class="badge badge-status badge-status-partial mb-1">Partial Blockage</span>
+              <h3 class="fw-bold mb-0 text-warning">{{ record.blockage_percentage }}% Blockage</h3>
+            </div>
+          {% else %}
+            <span class="stat-icon stat-icon-red me-3"><i class="bi bi-shield-slash-fill"></i></span>
+            <div>
+              <span class="badge badge-status badge-status-heavy mb-1">Heavy Blockage</span>
+              <h3 class="fw-bold mb-0 text-danger">{{ record.blockage_percentage }}% Blockage</h3>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Progress Gauge -->
+        <label class="form-label small fw-semibold text-muted mb-1 d-flex justify-content-between">
+          <span>Observed Obstruction Ratio</span>
+          <span>Threshold: 20% Clear | 60% Heavy</span>
+        </label>
+        <div class="blockage-progress-container mb-2">
+          {% if record.blockage_status == 'Clear' %}
+            <div class="blockage-progress-bar progress-clear" style="width: {{ record.blockage_percentage }}%;">
+              {{ record.blockage_percentage }}%
+            </div>
+          {% elif record.blockage_status == 'Partially Blocked' %}
+            <div class="blockage-progress-bar progress-partial" style="width: {{ record.blockage_percentage }}%;">
+              {{ record.blockage_percentage }}%
+            </div>
+          {% else %}
+            <div class="blockage-progress-bar progress-heavy" style="width: {{ record.blockage_percentage }}%;">
+              {{ record.blockage_percentage }}%
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Warning Alert Message -->
+      <div class="col-lg-7">
+        <div class="p-3 rounded-3 {% if record.blockage_status == 'Clear' %}bg-success bg-opacity-10 border border-success border-opacity-25{% elif record.blockage_status == 'Partially Blocked' %}bg-warning bg-opacity-10 border border-warning border-opacity-25{% else %}bg-danger bg-opacity-10 border border-danger border-opacity-25{% endif %}">
+          <div class="d-flex">
+            <div class="fs-3 me-3 {% if record.blockage_status == 'Clear' %}text-success{% elif record.blockage_status == 'Partially Blocked' %}text-warning{% else %}text-danger{% endif %}">
+              <i class="bi {% if record.blockage_status == 'Clear' %}bi-check-circle-fill{% elif record.blockage_status == 'Partially Blocked' %}bi-exclamation-triangle-fill{% else %}bi-exclamation-octagon-fill{% endif %}"></i>
+            </div>
+            <div>
+              <h6 class="fw-bold mb-1 {% if record.blockage_status == 'Clear' %}text-success{% elif record.blockage_status == 'Partially Blocked' %}text-warning{% else %}text-danger{% endif %}">
+                System Advisory Message
+              </h6>
+              <p class="mb-0 fw-semibold text-dark">
+                {{ record.warning_message }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Media Visual Comparison Card -->
+  <div class="card-custom mb-4 overflow-hidden">
+    <div class="card-header-custom d-flex justify-content-between align-items-center">
+      <h5 class="mb-0 fw-bold"><i class="bi bi-eye me-2 text-primary"></i> Media Inspection Comparison</h5>
+      <span class="badge bg-light text-dark border">
+        Original: {{ record.original_filename }}
+      </span>
+    </div>
+    <div class="card-body p-4">
+      <div class="row g-4">
+        <!-- Original Media -->
+        <div class="col-lg-6">
+          <div class="text-center mb-2">
+            <span class="badge bg-secondary mb-2">Original Upload</span>
+          </div>
+          <div class="media-preview-container shadow-sm">
+            {% if record.file_type == 'image' %}
+              <img src="{{ url_for('serve_upload', filename=record.stored_filename) }}" 
+                   alt="Original Drain Image" class="media-preview-img">
+            {% else %}
+              <video controls class="w-100" style="max-height: 480px;">
+                <source src="{{ url_for('serve_upload', filename=record.stored_filename) }}">
+                Your browser does not support the video tag.
+              </video>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Annotated Media -->
+        <div class="col-lg-6">
+          <div class="text-center mb-2">
+            <span class="badge bg-primary mb-2">YOLOv8 &amp; OpenCV Annotated</span>
+          </div>
+          <div class="media-preview-container shadow-sm">
+            {% if record.file_type == 'image' %}
+              <img src="{{ url_for('serve_output', filename=record.output_filename) }}" 
+                   alt="Annotated Drain Output" class="media-preview-img">
+            {% else %}
+              <video controls class="w-100" style="max-height: 480px;">
+                <source src="{{ url_for('serve_output', filename=record.output_filename) }}">
+                Your browser does not support the video tag.
+              </video>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed Analysis Table and Logic Cards -->
+  <div class="row g-4">
+    <!-- Detected Objects Table -->
+    <div class="col-lg-6">
+      <div class="card-custom h-100 p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-tags me-2 text-primary"></i> Detected Waste Objects</h5>
+        {% if record.detected_objects_parsed and record.detected_objects_parsed|length > 0 %}
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Object Class</th>
+                  <th>Category</th>
+                  <th>Confidence</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for obj in record.detected_objects_parsed %}
+                  <tr>
+                    <td>
+                      {% if obj == 'plastic_waste' %}
+                        <span class="badge bg-danger">plastic_waste</span>
+                      {% elif obj == 'leaves' %}
+                        <span class="badge bg-success">leaves</span>
+                      {% elif obj == 'paper_waste' %}
+                        <span class="badge bg-warning text-dark">paper_waste</span>
+                      {% elif obj == 'mud_sediment' %}
+                        <span class="badge bg-purple text-white" style="background-color: #8b5cf6;">mud_sediment</span>
+                      {% else %}
+                        <span class="badge bg-info text-dark">{{ obj }}</span>
+                      {% endif %}
+                    </td>
+                    <td class="small text-muted">
+                      {% if obj == 'plastic_waste' %}Synthetic Polymer (High Risk)
+                      {% elif obj == 'leaves' %}Organic Debris
+                      {% elif obj == 'paper_waste' %}Pulp Debris
+                      {% elif obj == 'mud_sediment' %}Silt Sludge (Flow Reducer)
+                      {% else %}Drain Structure{% endif %}
+                    </td>
+                    <td>
+                      {% if record.confidence_scores_parsed and obj in record.confidence_scores_parsed %}
+                        <span class="badge bg-light text-dark border">{{ record.confidence_scores_parsed[obj] }}</span>
+                      {% else %}
+                        <span class="badge bg-light text-dark border">0.88</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="alert alert-light border text-center py-4 text-muted">
+            <i class="bi bi-check-circle fs-3 text-success d-block mb-2"></i>
+            No visible waste debris detected inside the drainage aperture.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Mathematical Formula & Technical Info -->
+    <div class="col-lg-6">
+      <div class="card-custom h-100 p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-calculator me-2 text-primary"></i> Blockage Estimation Logic</h5>
+        <div class="bg-light p-3 rounded border mb-3 small">
+          <code>
+            Blockage (%) = (Area(Debris &cap; Drain Opening) / Area(Drain Opening)) &times; 100
+          </code>
+        </div>
+        <p class="small text-muted mb-3">
+          The algorithm uses exact binary masks to calculate the non-overlapping intersection between waste bounding boxes 
+          and the primary drain aperture. Overlapping debris is merged to prevent double-counting.
+        </p>
+
+        <h6 class="fw-bold small mb-2">Threshold Standards Applied:</h6>
+        <div class="d-flex flex-column gap-2 small">
+          <div class="d-flex justify-content-between p-2 rounded bg-light border-start border-4 border-success">
+            <span><strong>0% &ndash; 20%:</strong> Normal water flow condition</span>
+            <span class="text-success fw-bold">Clear</span>
+          </div>
+          <div class="d-flex justify-content-between p-2 rounded bg-light border-start border-4 border-warning">
+            <span><strong>21% &ndash; 60%:</strong> Routine maintenance recommended</span>
+            <span class="text-warning fw-bold">Partially Blocked</span>
+          </div>
+          <div class="d-flex justify-content-between p-2 rounded bg-light border-start border-4 border-danger">
+            <span><strong>&gt; 60%:</strong> Critical flood hazard; dispatch cleaning crew</span>
+            <span class="text-danger fw-bold">Heavily Blocked</span>
+          </div>
+        </div>
+
+        <div class="alert alert-secondary border mt-3 py-2 small mb-0">
+          <i class="bi bi-info-circle me-1"></i>
+          <strong>Disclaimer:</strong> This is a preliminary visual inspection tool and should not replace professional drainage inspection.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

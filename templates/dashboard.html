@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics Dashboard – DrainSight AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Dashboard Top Header -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-1"><i class="bi bi-speedometer2 text-primary me-2"></i> Drainage Telemetry Dashboard</h2>
+      <p class="text-muted mb-0">Real-time statistics, waste category distributions, and historical inspection logs.</p>
+    </div>
+    <div class="d-flex gap-2 mt-3 mt-md-0">
+      <a href="{{ url_for('download_report') }}" class="btn btn-outline-success">
+        <i class="bi bi-file-earmark-spreadsheet me-1"></i> Download CSV Report
+      </a>
+      <a href="{{ url_for('upload_image') }}" class="btn btn-primary-custom">
+        <i class="bi bi-plus-circle me-1"></i> New Inspection
+      </a>
+    </div>
+  </div>
+
+  <!-- KPI Metric Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4 col-lg-2">
+      <div class="stat-card h-100">
+        <div class="stat-icon stat-icon-blue"><i class="bi bi-image"></i></div>
+        <div>
+          <div class="stat-value">{{ stats.total_images }}</div>
+          <div class="stat-label">Images</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+      <div class="stat-card h-100">
+        <div class="stat-icon stat-icon-teal"><i class="bi bi-camera-video"></i></div>
+        <div>
+          <div class="stat-value">{{ stats.total_videos }}</div>
+          <div class="stat-label">Videos</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+      <div class="stat-card h-100">
+        <div class="stat-icon stat-icon-blue"><i class="bi bi-folder-check"></i></div>
+        <div>
+          <div class="stat-value">{{ stats.total_inspections }}</div>
+          <div class="stat-label">Total</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+      <div class="stat-card h-100">
+        <div class="stat-icon stat-icon-green"><i class="bi bi-shield-check"></i></div>
+        <div>
+          <div class="stat-value text-success">{{ stats.clear_count }}</div>
+          <div class="stat-label">Clear</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+      <div class="stat-card h-100">
+        <div class="stat-icon stat-icon-amber"><i class="bi bi-exclamation-triangle"></i></div>
+        <div>
+          <div class="stat-value text-warning">{{ stats.partial_count }}</div>
+          <div class="stat-label">Partial</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+      <div class="stat-card h-100">
+        <div class="stat-icon stat-icon-red"><i class="bi bi-shield-slash"></i></div>
+        <div>
+          <div class="stat-value text-danger">{{ stats.heavy_count }}</div>
+          <div class="stat-label">Heavy</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="row g-4 mb-4">
+    <!-- Donut Chart: Blockage Status Distribution -->
+    <div class="col-lg-5">
+      <div class="card-custom h-100 p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-pie-chart me-2 text-primary"></i> Blockage Status Distribution</h5>
+        <div style="height: 260px; position: relative;">
+          <canvas id="statusChart" 
+                  data-clear="{{ stats.clear_count }}" 
+                  data-partial="{{ stats.partial_count }}" 
+                  data-heavy="{{ stats.heavy_count }}">
+          </canvas>
+        </div>
+        <div class="d-flex justify-content-around text-center mt-3 pt-2 border-top small">
+          <div><span class="badge bg-success me-1">&bull;</span> Clear (0-20%)</div>
+          <div><span class="badge bg-warning text-dark me-1">&bull;</span> Partial (21-60%)</div>
+          <div><span class="badge bg-danger me-1">&bull;</span> Heavy (&gt;60%)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bar Chart: Most Commonly Detected Waste Types -->
+    <div class="col-lg-7">
+      <div class="card-custom h-100 p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-bar-chart me-2 text-primary"></i> Most Commonly Detected Waste Types</h5>
+        <div style="height: 260px; position: relative;">
+          <canvas id="wasteChart"
+                  data-plastic="{{ stats.waste_distribution.plastic_waste }}"
+                  data-leaves="{{ stats.waste_distribution.leaves }}"
+                  data-paper="{{ stats.waste_distribution.paper_waste }}"
+                  data-mud="{{ stats.waste_distribution.mud_sediment }}">
+          </canvas>
+        </div>
+        <div class="d-flex justify-content-around text-center mt-3 pt-2 border-top small text-muted">
+          <div><span class="badge bg-danger me-1">&bull;</span> Plastic Waste</div>
+          <div><span class="badge bg-success me-1">&bull;</span> Leaves / Plant Debris</div>
+          <div><span class="badge bg-warning text-dark me-1">&bull;</span> Paper &amp; Cardboard</div>
+          <div><span class="badge text-white me-1" style="background-color: #8b5cf6;">&bull;</span> Mud / Silt</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Historical Inspections Table Card -->
+  <div class="card-custom overflow-hidden">
+    <div class="card-header-custom d-flex justify-content-between align-items-center">
+      <h5 class="mb-0 fw-bold"><i class="bi bi-clock-history me-2 text-primary"></i> Recent Inspection History</h5>
+      <span class="text-muted small">Showing up to 50 recent records</span>
+    </div>
+
+    <div class="table-responsive">
+      {% if history and history|length > 0 %}
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Date &amp; Time</th>
+              <th scope="col">Media</th>
+              <th scope="col">File Name</th>
+              <th scope="col">Detected Waste</th>
+              <th scope="col">Blockage %</th>
+              <th scope="col">Status</th>
+              <th scope="col">Advisory Warning</th>
+              <th scope="col" class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in history %}
+              <tr>
+                <td class="fw-bold">#{{ item.id }}</td>
+                <td class="small text-muted">{{ item.created_at }}</td>
+                <td>
+                  {% if item.file_type == 'image' %}
+                    <span class="badge bg-light text-primary border"><i class="bi bi-image me-1"></i> Image</span>
+                  {% else %}
+                    <span class="badge bg-light text-secondary border"><i class="bi bi-film me-1"></i> Video</span>
+                  {% endif %}
+                </td>
+                <td class="small fw-semibold text-truncate" style="max-width: 140px;" title="{{ item.original_filename }}">
+                  {{ item.original_filename }}
+                </td>
+                <td>
+                  {% if item.detected_objects_parsed and item.detected_objects_parsed|length > 0 %}
+                    <div class="d-flex flex-wrap gap-1">
+                      {% for obj in item.detected_objects_parsed %}
+                        {% if obj == 'plastic_waste' %}
+                          <span class="badge bg-danger" style="font-size: 0.7rem;">plastic</span>
+                        {% elif obj == 'leaves' %}
+                          <span class="badge bg-success" style="font-size: 0.7rem;">leaves</span>
+                        {% elif obj == 'paper_waste' %}
+                          <span class="badge bg-warning text-dark" style="font-size: 0.7rem;">paper</span>
+                        {% elif obj == 'mud_sediment' %}
+                          <span class="badge text-white" style="background-color: #8b5cf6; font-size: 0.7rem;">mud</span>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                  {% else %}
+                    <span class="text-muted small">None</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="fw-bold">{{ item.blockage_percentage }}%</span>
+                </td>
+                <td>
+                  {% if item.blockage_status == 'Clear' %}
+                    <span class="badge badge-status badge-status-clear">Clear</span>
+                  {% elif item.blockage_status == 'Partially Blocked' %}
+                    <span class="badge badge-status badge-status-partial">Partial</span>
+                  {% else %}
+                    <span class="badge badge-status badge-status-heavy">Heavy</span>
+                  {% endif %}
+                </td>
+                <td class="small text-truncate" style="max-width: 220px;" title="{{ item.warning_message }}">
+                  {{ item.warning_message }}
+                </td>
+                <td class="text-end">
+                  <div class="btn-group btn-group-sm">
+                    <a href="{{ url_for('result_page', analysis_id=item.id) }}" class="btn btn-outline-primary" title="View Diagnosis">
+                      <i class="bi bi-eye"></i>
+                    </a>
+                    <a href="{{ url_for('download_file', filename=item.output_filename) }}" class="btn btn-outline-secondary" title="Download Output">
+                      <i class="bi bi-download"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="text-center py-5">
+          <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
+          <h5 class="fw-bold text-muted">No inspection records yet</h5>
+          <p class="text-muted small mb-3">Upload your first drainage image or video to populate the dashboard.</p>
+          <a href="{{ url_for('upload_image') }}" class="btn btn-primary-custom btn-sm">
+            <i class="bi bi-upload me-1"></i> Start First Inspection
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

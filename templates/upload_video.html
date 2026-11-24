@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Drainage Video – DrainSight AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Page Header -->
+  <div class="row mb-4">
+    <div class="col-lg-8">
+      <h2 class="fw-bold mb-1"><i class="bi bi-camera-video text-primary me-2"></i> Drainage Video Inspection</h2>
+      <p class="text-muted">
+        Upload continuous video inspection footage to analyze drainage flow conditions and detect maximum visible blockage across frames.
+      </p>
+    </div>
+    <div class="col-lg-4 text-lg-end align-self-center">
+      <a href="{{ url_for('upload_image') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-image me-1"></i> Switch to Image Upload
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Main Upload Form -->
+    <div class="col-lg-8">
+      <div class="card-custom p-4">
+        <form id="upload-form" action="{{ url_for('analyze_video') }}" method="POST" enctype="multipart/form-data">
+          <!-- Dropzone -->
+          <div id="dropzone" class="dropzone-area mb-3">
+            <input type="file" id="file-input" name="video" class="file-input-hidden" 
+                   accept=".mp4,.avi,.mov,.webm" required>
+            <div class="dropzone-icon text-secondary">
+              <i class="bi bi-film"></i>
+            </div>
+            <h5 class="fw-bold mb-1">Drag and drop your drain video here</h5>
+            <p class="text-muted small mb-3">or <span class="text-primary fw-semibold">browse files</span> from your device</p>
+            <div>
+              <span class="badge bg-light text-dark border me-1">MP4</span>
+              <span class="badge bg-light text-dark border me-1">AVI</span>
+              <span class="badge bg-light text-dark border me-1">MOV</span>
+              <span class="badge bg-light text-dark border me-1">WEBM</span>
+              <span class="badge bg-light text-secondary border">Max 50 MB</span>
+            </div>
+          </div>
+
+          <!-- Video Processing Options -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">Frame Sampling Rate</label>
+              <select name="sample_rate" class="form-select">
+                <option value="4" selected>Every 4th Frame (Recommended - Fast &amp; Balanced)</option>
+                <option value="2">Every 2nd Frame (Thorough Analysis)</option>
+                <option value="6">Every 6th Frame (Rapid Overview)</option>
+              </select>
+              <div class="form-text small">Extracts &amp; runs YOLO on sample intervals; annotates full output video.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold text-muted">Detection Sensitivity</label>
+              <input type="text" class="form-control bg-light" value="Confidence Threshold: 0.35 (YOLOv8)" readonly>
+              <div class="form-text small">Configured in config.py for optimum debris recall.</div>
+            </div>
+          </div>
+
+          <!-- File Preview Box -->
+          <div id="file-preview-card" class="alert alert-light border d-flex align-items-center mb-3" style="display: none !important;">
+            <i class="bi bi-file-earmark-play fs-3 text-secondary me-3"></i>
+            <div class="flex-grow-1">
+              <div id="file-name-display" class="fw-semibold">video.mp4</div>
+              <small id="file-size-display" class="text-muted">0 MB</small>
+            </div>
+            <span class="badge bg-success"><i class="bi bi-check-lg me-1"></i> Ready for Processing</span>
+          </div>
+
+          <!-- Progress Bar Container -->
+          <div id="upload-progress-container" class="mb-3" style="display: none;">
+            <label class="form-label small fw-semibold text-muted mb-1">Uploading Video to Server...</label>
+            <div class="progress" style="height: 12px;">
+              <div id="upload-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-secondary" 
+                   role="progressbar" style="width: 0%;">0%</div>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn btn-secondary-custom btn-lg w-100">
+            <i class="bi bi-play-circle me-2"></i> Process Video &amp; Generate Annotated Output
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Guidelines Column -->
+    <div class="col-lg-4">
+      <div class="card-custom p-4 mb-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-info-circle text-secondary me-2"></i> Video Recommendations</h5>
+        <ul class="list-unstyled small text-muted mb-0">
+          <li class="mb-3 d-flex">
+            <i class="bi bi-check2-circle text-success me-2 fs-6"></i>
+            <div><strong>5–30 Seconds Duration:</strong> Keeps processing time low and prevents timeout on free hosting plans.</div>
+          </li>
+          <li class="mb-3 d-flex">
+            <i class="bi bi-check2-circle text-success me-2 fs-6"></i>
+            <div><strong>Steady Camera Pan:</strong> Slowly sweep along roadside drains or culvert pipe mouths.</div>
+          </li>
+          <li class="mb-3 d-flex">
+            <i class="bi bi-check2-circle text-success me-2 fs-6"></i>
+            <div><strong>Peak Blockage Metric:</strong> The system automatically logs the worst blockage percentage encountered across all frames.</div>
+          </li>
+          <li class="d-flex">
+            <i class="bi bi-download text-primary me-2 fs-6"></i>
+            <div><strong>Exportable Video:</strong> You will be able to download the rendered, fully annotated video with bounding boxes.</div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card-custom p-4 bg-light">
+        <h6 class="fw-bold mb-2">College Demo Tip</h6>
+        <p class="small text-muted mb-0">
+          When presenting on a laptop or free cloud tier (Render), upload a 5 to 10 second MP4 video clip under 15 MB for near-instant rendering.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="loading-overlay">
+  <div class="spinner-border text-info mb-3" style="width: 3.5rem; height: 3.5rem;" role="status"></div>
+  <h4 class="fw-bold">Processing Drainage Video...</h4>
+  <p class="text-light opacity-75 small text-center max-w-500">
+    Extracting frames with OpenCV, running YOLOv8 object detection, calculating peak obstruction, and encoding the annotated MP4 video.
+  </p>
+</div>
+{% endblock %}

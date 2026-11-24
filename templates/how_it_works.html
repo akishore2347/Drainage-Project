@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}How It Works – DrainSight AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Page Header -->
+  <div class="text-center mb-5">
+    <div class="d-inline-flex align-items-center bg-info bg-opacity-25 text-info px-3 py-1 rounded-pill small fw-semibold mb-2">
+      <i class="bi bi-cpu me-2"></i> Computer Vision Pipeline
+    </div>
+    <h2 class="fw-bold">How DrainSight AI Detects Blockages</h2>
+    <p class="text-muted max-w-700 mx-auto">
+      An end-to-end sensorless architecture that transforms standard digital imagery into quantitative 
+      drainage obstruction metrics and early warning signals.
+    </p>
+  </div>
+
+  <!-- Interactive System Architecture Diagram -->
+  <div class="card-custom p-4 mb-5 shadow-sm text-center">
+    <h5 class="fw-bold mb-3"><i class="bi bi-diagram-3 me-2 text-primary"></i> High-Level Architecture Diagram</h5>
+    <div class="p-2 bg-white rounded border">
+      <img src="{{ url_for('static', filename='images/architecture.svg') }}" 
+           alt="DrainSight AI System Architecture" class="img-fluid rounded">
+    </div>
+  </div>
+
+  <!-- 6-Step Workflow Breakdown -->
+  <div class="row g-4 mb-5">
+    <div class="col-md-6 col-lg-4">
+      <div class="card-custom h-100 p-4">
+        <div class="step-number">1</div>
+        <h5 class="fw-bold">1. Media Acquisition</h5>
+        <p class="text-muted small">
+          Users upload digital images (JPG, PNG, WEBP) or video clips (MP4, AVI) captured using standard smartphones, 
+          handheld cameras, or municipality CCTV streams. No underwater sensors or ultrasonic meters are required.
+        </p>
+        <div class="badge bg-light text-primary border">Input Module</div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+      <div class="card-custom h-100 p-4">
+        <div class="step-number">2</div>
+        <h5 class="fw-bold">2. OpenCV Image Enhancement</h5>
+        <p class="text-muted small">
+          Input media undergoes noise reduction via <strong>Bilateral Filtering</strong> to smooth textures while retaining 
+          sharp iron grate edges. <strong>CLAHE</strong> (Contrast Limited Adaptive Histogram Equalization) boosts contrast in dark culvert shadows.
+        </p>
+        <div class="badge bg-light text-primary border">OpenCV 4.8</div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+      <div class="card-custom h-100 p-4">
+        <div class="step-number">3</div>
+        <h5 class="fw-bold">3. YOLOv8 Object Detection</h5>
+        <p class="text-muted small">
+          A trained Ultralytics YOLOv8 convolutional neural network identifies the primary <code>drain_opening</code> 
+          and scans for four distinct waste classes: <code>plastic_waste</code>, <code>leaves</code>, <code>paper_waste</code>, 
+          and <code>mud_sediment</code>.
+        </p>
+        <div class="badge bg-light text-primary border">Ultralytics YOLOv8</div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+      <div class="card-custom h-100 p-4">
+        <div class="step-number">4</div>
+        <h5 class="fw-bold">4. Geometric IoU Overlap</h5>
+        <p class="text-muted small">
+          Instead of naive counts, the system computes the exact pixel intersection between waste bounding boxes and 
+          the drain aperture. Overlapping debris masks are unified to prevent double-counting.
+        </p>
+        <div class="badge bg-light text-primary border">Spatial Math</div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+      <div class="card-custom h-100 p-4">
+        <div class="step-number">5</div>
+        <h5 class="fw-bold">5. Threshold Risk Stratification</h5>
+        <p class="text-muted small">
+          The calculated obstruction percentage is classified into three standardized risk levels: 
+          <strong>0–20% (Clear)</strong>, <strong>21–60% (Partially Blocked)</strong>, and <strong>&gt;60% (Heavily Blocked)</strong>.
+        </p>
+        <div class="badge bg-light text-primary border">Risk Engine</div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+      <div class="card-custom h-100 p-4">
+        <div class="step-number">6</div>
+        <h5 class="fw-bold">6. Telemetry &amp; Alerting</h5>
+        <p class="text-muted small">
+          The annotated media with bounding boxes and HUD banners is rendered and saved. Results are archived in an SQLite 
+          database and rendered on an analytics dashboard with instant CSV report generation.
+        </p>
+        <div class="badge bg-light text-primary border">Dashboard &amp; SQLite</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- In-depth Mathematical Formulation & Watershed Segmentation -->
+  <div class="row g-4 mb-5">
+    <div class="col-lg-6">
+      <div class="card-custom h-100 p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-calculator me-2 text-primary"></i> Blockage Calculation Formulation</h5>
+        <p class="small text-muted">
+          Let $\Omega_{\text{drain}} \subset \mathbb{R}^2$ denote the bounding polygon of the primary drainage aperture, 
+          and let $\Omega_{\text{waste}} = \bigcup_{i=1}^N \Omega_i$ represent the union of all $N$ detected waste objects.
+        </p>
+        <div class="bg-light p-3 rounded border text-center my-3">
+          <strong class="fs-5 text-primary">
+            $\text{Blockage Ratio} = \frac{\text{Area}(\Omega_{\text{drain}} \cap \Omega_{\text{waste}})}{\text{Area}(\Omega_{\text{drain}})} \times 100\%$
+          </strong>
+        </div>
+        <p class="small text-muted mb-0">
+          This formulation guarantees that debris lying outside the drainage rim does not falsely penalize the blockage score, 
+          while clustered trash is accounted for accurately without exceeding 100%.
+        </p>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card-custom h-100 p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-water me-2 text-primary"></i> Optional Watershed Segmentation</h5>
+        <p class="small text-muted">
+          In addition to bounding box detection, the system includes an OpenCV Watershed Segmentation algorithm 
+          to segment irregular sludge and plastic boundaries from surrounding water and pavement.
+        </p>
+        <ul class="small text-muted ps-3 mb-3">
+          <li><strong>Otsu Thresholding:</strong> Isolates high-contrast foreground debris.</li>
+          <li><strong>Morphological Opening:</strong> Eliminates isolated noise pixels.</li>
+          <li><strong>Distance Transform ($L_2$):</strong> Identifies sure foreground centers.</li>
+          <li><strong>Topological Watershed:</strong> Floyd-Warshall style immersion flood to trace organic debris perimeters.</li>
+        </ul>
+        <span class="badge bg-light text-secondary border">OpenCV Watershed Algorithm</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Advantages Card -->
+  <div class="card-custom p-4 bg-light border-0">
+    <h5 class="fw-bold mb-3 text-center">Why Computer Vision Over Physical Sensors?</h5>
+    <div class="row g-4 text-center">
+      <div class="col-md-3">
+        <i class="bi bi-currency-dollar fs-1 text-success d-block mb-2"></i>
+        <h6 class="fw-bold">Zero Sensor Cost</h6>
+        <p class="text-muted small">No expensive submerged flowmeters, pressure sensors, or IoT battery replacements.</p>
+      </div>
+      <div class="col-md-3">
+        <i class="bi bi-shield-x fs-1 text-primary d-block mb-2"></i>
+        <h6 class="fw-bold">Immune to Corrosion</h6>
+        <p class="text-muted small">Physical sensors foul and corrode rapidly in acidic sewer wastewater; cameras remain remote.</p>
+      </div>
+      <div class="col-md-3">
+        <i class="bi bi-phone fs-1 text-info d-block mb-2"></i>
+        <h6 class="fw-bold">Mobile Friendly</h6>
+        <p class="text-muted small">Municipal workers can snap photos from a smartphone or mount cameras to street sweepers.</p>
+      </div>
+      <div class="col-md-3">
+        <i class="bi bi-lightning-charge fs-1 text-warning d-block mb-2"></i>
+        <h6 class="fw-bold">Instant Diagnosis</h6>
+        <p class="text-muted small">Inference completes in milliseconds on standard laptop CPUs and mobile processors.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

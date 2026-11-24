@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Drainage Image – DrainSight AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Page Header -->
+  <div class="row mb-4">
+    <div class="col-lg-8">
+      <h2 class="fw-bold mb-1"><i class="bi bi-image text-primary me-2"></i> Drainage Image Inspection</h2>
+      <p class="text-muted">
+        Upload a photo of a roadside gutter, manhole, culvert, or stormwater grate for computer vision blockage analysis.
+      </p>
+    </div>
+    <div class="col-lg-4 text-lg-end align-self-center">
+      <a href="{{ url_for('upload_video') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-camera-video me-1"></i> Switch to Video Upload
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Main Upload Column -->
+    <div class="col-lg-8">
+      <div class="card-custom p-4">
+        <form id="upload-form" action="{{ url_for('analyze_image') }}" method="POST" enctype="multipart/form-data">
+          <!-- Dropzone -->
+          <div id="dropzone" class="dropzone-area mb-3">
+            <input type="file" id="file-input" name="image" class="file-input-hidden" 
+                   accept=".jpg,.jpeg,.png,.webp" required>
+            <div class="dropzone-icon">
+              <i class="bi bi-cloud-arrow-up"></i>
+            </div>
+            <h5 class="fw-bold mb-1">Drag and drop your drain image here</h5>
+            <p class="text-muted small mb-3">or <span class="text-primary fw-semibold">browse files</span> from your device</p>
+            <div>
+              <span class="badge bg-light text-dark border me-1">JPG</span>
+              <span class="badge bg-light text-dark border me-1">JPEG</span>
+              <span class="badge bg-light text-dark border me-1">PNG</span>
+              <span class="badge bg-light text-dark border me-1">WEBP</span>
+              <span class="badge bg-light text-secondary border">Max 10 MB</span>
+            </div>
+          </div>
+
+          <!-- File Preview Box -->
+          <div id="file-preview-card" class="alert alert-light border d-flex align-items-center mb-3" style="display: none !important;">
+            <i class="bi bi-file-earmark-image fs-3 text-primary me-3"></i>
+            <div class="flex-grow-1">
+              <div id="file-name-display" class="fw-semibold">filename.jpg</div>
+              <small id="file-size-display" class="text-muted">0 KB</small>
+            </div>
+            <span class="badge bg-success"><i class="bi bi-check-lg me-1"></i> Ready</span>
+          </div>
+
+          <!-- Progress Bar Container -->
+          <div id="upload-progress-container" class="mb-3" style="display: none;">
+            <label class="form-label small fw-semibold text-muted mb-1">Uploading &amp; Preprocessing Image...</label>
+            <div class="progress" style="height: 12px;">
+              <div id="upload-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
+                   role="progressbar" style="width: 0%;">0%</div>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn btn-primary-custom btn-lg w-100">
+            <i class="bi bi-cpu me-2"></i> Run DrainSight AI Analysis
+          </button>
+        </form>
+
+        <!-- Quick Demo Testing Divider -->
+        <div class="text-center my-4 position-relative">
+          <hr>
+          <span class="bg-white px-3 text-muted small position-absolute top-50 start-50 translate-middle">
+            OR TEST WITH ONE-CLICK SAMPLES
+          </span>
+        </div>
+
+        <div class="row g-2">
+          <div class="col-md-4">
+            <form action="{{ url_for('analyze_sample', sample_name='clear') }}" method="POST">
+              <button type="submit" class="btn btn-outline-success w-100 py-2 text-start d-flex align-items-center justify-content-between">
+                <div>
+                  <div class="fw-bold small">Sample Clear Drain</div>
+                  <div class="text-muted" style="font-size: 0.75rem;">0–20% blockage</div>
+                </div>
+                <i class="bi bi-chevron-right"></i>
+              </button>
+            </form>
+          </div>
+          <div class="col-md-4">
+            <form action="{{ url_for('analyze_sample', sample_name='partial') }}" method="POST">
+              <button type="submit" class="btn btn-outline-warning text-dark w-100 py-2 text-start d-flex align-items-center justify-content-between">
+                <div>
+                  <div class="fw-bold small">Sample Partial Block</div>
+                  <div class="text-muted" style="font-size: 0.75rem;">21–60% blockage</div>
+                </div>
+                <i class="bi bi-chevron-right"></i>
+              </button>
+            </form>
+          </div>
+          <div class="col-md-4">
+            <form action="{{ url_for('analyze_sample', sample_name='heavy') }}" method="POST">
+              <button type="submit" class="btn btn-outline-danger w-100 py-2 text-start d-flex align-items-center justify-content-between">
+                <div>
+                  <div class="fw-bold small">Sample Heavy Block</div>
+                  <div class="text-muted" style="font-size: 0.75rem;">&gt;60% blockage</div>
+                </div>
+                <i class="bi bi-chevron-right"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Instructions & Guidelines Column -->
+    <div class="col-lg-4">
+      <div class="card-custom p-4 mb-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-camera me-2 text-primary"></i> Capture Best Practices</h5>
+        <ul class="list-unstyled small text-muted mb-0">
+          <li class="mb-3 d-flex">
+            <i class="bi bi-check-circle-fill text-success me-2 fs-6"></i>
+            <div><strong>Top-Down or 45° Angle:</strong> Capture the drainage opening and immediate surrounding pavement.</div>
+          </li>
+          <li class="mb-3 d-flex">
+            <i class="bi bi-check-circle-fill text-success me-2 fs-6"></i>
+            <div><strong>Sufficient Lighting:</strong> Daylight or flash ensures debris color contrasts (plastic, leaves, silt) are sharp.</div>
+          </li>
+          <li class="mb-3 d-flex">
+            <i class="bi bi-check-circle-fill text-success me-2 fs-6"></i>
+            <div><strong>Avoid Lens Smudges:</strong> Keep camera steady to avoid motion blur.</div>
+          </li>
+          <li class="d-flex">
+            <i class="bi bi-info-circle-fill text-info me-2 fs-6"></i>
+            <div><strong>Automatic Enhancement:</strong> OpenCV automatically applies Bilateral filtering and CLAHE lighting boost.</div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card-custom p-4 bg-light">
+        <h6 class="fw-bold mb-2"><i class="bi bi-bounding-box me-2 text-primary"></i> Detectable Classes</h6>
+        <div class="d-flex flex-wrap gap-1">
+          <span class="badge" style="background-color: #0284c7;">drain_opening</span>
+          <span class="badge" style="background-color: #ef4444;">plastic_waste</span>
+          <span class="badge" style="background-color: #22c55e;">leaves</span>
+          <span class="badge" style="background-color: #f59e0b;">paper_waste</span>
+          <span class="badge" style="background-color: #8b5cf6;">mud_sediment</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="loading-overlay">
+  <div class="spinner-border text-info mb-3" style="width: 3.5rem; height: 3.5rem;" role="status"></div>
+  <h4 class="fw-bold">Analyzing Drain System...</h4>
+  <p class="text-light opacity-75 small">Applying CLAHE lighting, running YOLOv8 detection, and computing blockage overlap.</p>
+</div>
+{% endblock %}
